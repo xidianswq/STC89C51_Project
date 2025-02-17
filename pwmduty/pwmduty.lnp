@@ -1,4 +1,0 @@
-"pwm1.obj",
-"STARTUP.obj" 
-TO "pwmduty" 
-RAMSIZE(256) 

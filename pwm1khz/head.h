@@ -14,7 +14,7 @@ unsigned char letter[46] = {
 0x3e,0x1c,0x7e,0x64,0x6e,0x59,1,15,0x10,8,
 0x3f,0x6,0x5b,0x4f,0x66,0x6d,0x7d,0x7,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71};
 int con[8]={0,4,8,12,16,20,24,28};
-int duty[2];
+unsigned int duty[2];
 idata int print_set[8]={29,29,29,18,4,19,29,29};
 idata int print_enter[8]={29,29,4,13,19,4,17,29};
 idata int print_num[8]={29,29,29,29,29,29,29,29};
@@ -22,7 +22,8 @@ idata int print_num[8]={29,29,29,29,29,29,29,29};
 //0A 1B 2C 3D 4E 5F 6G 7H 8I 9J 10K 11L 12M 13N 14O 15P 16Q 17R 18S 19T 20U 21V 22W 23X 24Y 25Z
 //26- 27 | 28|  29_
 idata int key,i,j,k,symbol;//全局变量定义太多，系统默认寻址data区，满了，定义要前加idata
-idata int duty_num;
+long int l_num[2],h_num[2];
+unsigned int prog;
 
 
 void delay(int a)
