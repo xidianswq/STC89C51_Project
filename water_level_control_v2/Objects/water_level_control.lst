@@ -1,0 +1,33 @@
+C51 COMPILER V9.01   WATER_LEVEL_CONTROL                                                   10/30/2024 09:34:07 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE WATER_LEVEL_CONTROL
+OBJECT MODULE PLACED IN .\Objects\water_level_control.obj
+COMPILER INVOKED BY: D:\software\study\keil\C51\BIN\C51.EXE System\water_level_control.c LARGE BROWSE INCDIR(..\water_le
+                    -vel_control;.\Hardware;.\System;.\User) DEBUG OBJECTEXTEND PRINT(.\Objects\water_level_control.lst) OBJECT(.\Objects\wat
+                    -er_level_control.obj)
+
+line level    source
+
+   1          #include "water_level_control.h"
+   2          
+   3          
+   4          
+   5          
+   6          
+   7          
+   8          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,69 @@
+C51 COMPILER V9.01   MAIN                                                                  10/30/2024 09:34:07 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\software\study\keil\C51\BIN\C51.EXE User\main.c LARGE BROWSE INCDIR(..\water_level_control;.\Har
+                    -dware;.\System;.\User) DEBUG OBJECTEXTEND PRINT(.\Objects\main.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "water_level_control.h"        //按键设定水位，水位控制
+   2          #include "menu.h"               //菜单界面
+   3          #include "timer.h"              //定时器
+   4          #include "motor.h"              //水阀开关控制
+   5          #include "lcd1602.h"    //lcd显示屏
+   6          
+   7          //资源使用说明
+   8          /*
+   9          timer.h         定时器0                         
+  10          motor.h         P1^0,P1^1               
+  11          lcd1602.h       P0--DATA,P2^5--RW,P2^6--RS,P2^7--EN
+  12          */
+  13          
+  14          //系统运行时间
+  15          extern int working_hour;
+  16          extern int working_minute;
+  17          extern int working_second;
+  18          extern int water_sign;
+  19          void System_Init(){
+  20   1              char str1[]="AUTO-WATERING   ";
+  21   1              char str2[]="     WELCOME-SWQ";
+  22   1              Null_Action();
+  23   1              Timer_Init();                   //系统滴答定时器初始化
+  24   1              Exti_Init();                    //按键中断初始化
+  25   1              lcd1602_init();                 //lcd屏初始化
+  26   1              lcd1602_show_string(0,0,str1);
+  27   1              lcd1602_show_string(0,1,str2);
+  28   1              delay_s(3);
+  29   1              lcd1602_clear();
+  30   1      }
+  31          
+  32          int main()
+  33          {
+  34   1              System_Init();
+  35   1              while(1)
+  36   1              {
+  37   2                      delay_ms(799);
+  38   2                      running_time();
+  39   2                      show_page();            
+  40   2                      if(water_sign)Water_In();
+  41   2                      else Null_Action();
+  42   2              }
+  43   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    121    ----
+   CONSTANT SIZE    =     34    ----
+   XDATA SIZE       =   ----      34
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+C51 COMPILER V9.01   MAIN                                                                  10/30/2024 09:34:07 PAGE 2   
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,220 @@
+C51 COMPILER V9.01   MENU                                                                  10/30/2024 09:34:07 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MENU
+OBJECT MODULE PLACED IN .\Objects\menu.obj
+COMPILER INVOKED BY: D:\software\study\keil\C51\BIN\C51.EXE User\menu.c LARGE BROWSE INCDIR(..\water_level_control;.\Har
+                    -dware;.\System;.\User) DEBUG OBJECTEXTEND PRINT(.\Objects\menu.lst) OBJECT(.\Objects\menu.obj)
+
+line level    source
+
+   1          #include "menu.h"
+   2          #include "lcd1602.h"
+   3          #include "stdio.h"
+   4          //当前页
+   5          int page=0;
+   6          int last_page=0;
+   7          //系统运行时间
+   8          int working_hour=0;
+   9          int working_minute=0;
+  10          int working_second=0;
+  11          //当日时间
+  12          int current_hour=12;
+  13          int current_minute=30;
+  14          int current_second=30;
+  15          
+  16          //浇水间隔（h）
+  17          int watering_gap=1;                     
+  18          //浇水持续时长（s）
+  19          int watering_last=1;                    
+  20          //浇水使能位
+  21          int water_sign=0;
+  22          
+  23          int *num=NULL;
+  24          int num_max=24;
+  25          
+  26          void running_time(void)
+  27          {
+  28   1              //时间计算
+  29   1              working_second++;
+  30   1              
+  31   1              //判断是否浇水
+  32   1              if(water_sign==1 && working_second>=watering_last)water_sign=0;
+  33   1              
+  34   1              if(working_second==60)
+  35   1              {
+  36   2                      working_second=0;
+  37   2                      working_minute++;
+  38   2                      current_second=0;
+  39   2                      current_minute++;
+  40   2                      if(working_minute%watering_gap==0)water_sign=1;
+  41   2                      if(working_minute==60)
+  42   2                      {
+  43   3                              working_minute=0;
+  44   3                              working_hour++;
+  45   3                              
+  46   3                              //判断是否浇水
+  47   3                              if(working_hour%watering_gap==0)water_sign=1;
+  48   3                      
+  49   3                      }
+  50   2                      if(current_minute==60)
+  51   2                      {
+  52   3                              current_minute=0;
+  53   3                              current_hour++;
+  54   3                              if(current_hour==24)
+C51 COMPILER V9.01   MENU                                                                  10/30/2024 09:34:07 PAGE 2   
+
+  55   3                              {
+  56   4                                      current_hour=0;
+  57   4                              }
+  58   3                      }
+  59   2              }
+  60   1      }
+  61          
+  62          //菜单显示函数
+  63          void show_page(void)
+  64          {
+  65   1              void page_1(void);
+  66   1              void page_2(void);
+  67   1              void page_3(void);
+  68   1              void page_4(void);
+  69   1              void page_5(void);
+  70   1              void page_6(void);
+  71   1      
+  72   1              if(page!=last_page){
+  73   2                      lcd1602_clear();
+  74   2                      last_page=page;
+  75   2              }
+  76   1              switch(page){
+  77   2                      case 0:page_1();break;
+  78   2                      case 1:page_2();break;
+  79   2                      case 2:page_3();break;
+  80   2                      case 3:page_4();break;
+  81   2                      case 4:page_5();break;
+  82   2                      case 5:page_6();break;
+  83   2              }               
+  84   1      }
+  85          
+  86          void page_1(void)
+  87          {
+  88   1              char str1[]="current time:";
+  89   1              char str2[16];
+  90   1              sprintf(str2,"%02d:%02d:%02d",current_hour,current_minute,working_second);
+  91   1              lcd1602_show_string(0,0,str1);
+  92   1              lcd1602_show_string(0,1,str2);  
+  93   1      }
+  94          
+  95          void page_2(void)
+  96          {
+  97   1              char str1[]="working time:";
+  98   1              char str2[16];
+  99   1              sprintf(str2,"%04d:%02d:%02d",working_hour,working_minute,working_second);
+ 100   1              lcd1602_show_string(0,0,str1);
+ 101   1              lcd1602_show_string(0,1,str2);  
+ 102   1      }
+ 103          
+ 104          void page_3(void)
+ 105          {
+ 106   1              char str1[]="set time:";
+ 107   1              char str2[16];
+ 108   1              num=&current_hour;
+ 109   1              num_max=24;
+ 110   1              sprintf(str2,"%02d",current_hour);
+ 111   1              lcd1602_show_string(0,0,str1);
+ 112   1              lcd1602_show_string(0,1,str2);  
+ 113   1      }
+ 114          
+ 115          void page_4(void)
+ 116          {
+C51 COMPILER V9.01   MENU                                                                  10/30/2024 09:34:07 PAGE 3   
+
+ 117   1              char str1[]="set minute:";
+ 118   1              char str2[16];
+ 119   1              num=&current_minute;
+ 120   1              num_max=60;
+ 121   1              sprintf(str2,"%02d",current_minute);
+ 122   1              lcd1602_show_string(0,0,str1);
+ 123   1              lcd1602_show_string(0,1,str2);  
+ 124   1      }
+ 125          
+ 126          void page_5(void)
+ 127          {
+ 128   1              char str1[]="watering gap:";
+ 129   1              char str2[16];
+ 130   1              num=&watering_gap;
+ 131   1              num_max=240;
+ 132   1              sprintf(str2,"%03d hours",watering_gap);
+ 133   1              lcd1602_show_string(0,0,str1);
+ 134   1              lcd1602_show_string(0,1,str2);  
+ 135   1      }
+ 136          
+ 137          void page_6(void)
+ 138          {
+ 139   1              char str1[]="watering last:";
+ 140   1              char str2[16];
+ 141   1              num=&watering_last;
+ 142   1              num_max=60;
+ 143   1              sprintf(str2,"%02d seconds",watering_last);
+ 144   1              lcd1602_show_string(0,0,str1);
+ 145   1              lcd1602_show_string(0,1,str2);  
+ 146   1      }
+ 147          
+ 148          //****************************************
+ 149          //**************按键控制部分**************
+ 150          //****************************************
+ 151          //开启外部中断（按键）
+ 152          void Exti_Init(void)
+ 153          {
+ 154   1              IT0=1;//跳变沿触发方式（下降沿）
+ 155   1              EX0=1;//打开INT1的中断允许
+ 156   1              IT1=1;//跳变沿触发方式（下降沿）
+ 157   1              EX1=1;//打开INT1的中断允许
+ 158   1              EA=1;//打开总中断
+ 159   1      }
+ 160          
+ 161          //按键中断函数（外部中断0,1）
+ 162          void exti0() interrupt 0 //外部中断0中断函数
+ 163          {
+ 164   1              void show_page(void);
+ 165   1      
+ 166   1              int ten_us=1000;
+ 167   1              EX0=0;
+ 168   1              while(ten_us--);//消抖
+ 169   1              if(key1==0)
+ 170   1              {       
+ 171   2                      //中断处理函数
+ 172   2                      page=(page+1)%MAX_PAGE;
+ 173   2              }
+ 174   1              EX0=1;                                  
+ 175   1      }
+ 176          
+ 177          void exti1() interrupt 2 //外部中断1中断函数
+ 178          {
+C51 COMPILER V9.01   MENU                                                                  10/30/2024 09:34:07 PAGE 4   
+
+ 179   1              void show_page(void);
+ 180   1              
+ 181   1              int ten_us=1000;
+ 182   1              EX1=0;
+ 183   1              while(ten_us--);//消抖
+ 184   1              if(key2==0)
+ 185   1              {
+ 186   2                      //中断处理函数
+ 187   2                      *num=(*num+1)%num_max;  
+ 188   2              }
+ 189   1              EX1=1;
+ 190   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1205    ----
+   CONSTANT SIZE    =    138    ----
+   XDATA SIZE       =     27     175
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
