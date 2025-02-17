@@ -1,0 +1,143 @@
+C51 COMPILER V9.01   UART                                                                  10/29/2024 14:02:36 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE UART
+OBJECT MODULE PLACED IN .\Objects\uart.obj
+COMPILER INVOKED BY: D:\software\study\keil\C51\BIN\C51.EXE System\uart.c LARGE BROWSE INCDIR(..\water_level_control;.\H
+                    -ardware;.\System;.\User) DEBUG OBJECTEXTEND PRINT(.\Objects\uart.lst) OBJECT(.\Objects\uart.obj)
+
+line level    source
+
+   1          #include "uart.h"
+   2          u8 UART_RX_BUF[UART_REC_LEN];     //接收缓冲,最大UART_REC_LEN个字节.
+   3          //接收状态
+   4          //bit15，       接收完成标志
+   5          //bit14，       接收到0x0d
+   6          //bit13~0，     接收到的有效字节数目
+   7          u16 UART_RX_STA=0;       //接收状态标记
+   8          
+   9          void UART_Init(void)
+  10          {
+  11   1              SCON|=0X50;                     //设置为工作方式1
+  12   1              TMOD|=0X20;                     //设置计数器工作方式2
+  13   1              PCON=0X80;                      //波特率加倍
+  14   1              TH1=RELOAD_COUNT;       //计数器初始值设置
+  15   1              TL1=TH1;
+  16   1              ES=0;                           //关闭接收中断
+  17   1              EA=1;                           //打开总中断
+  18   1              TR1=1;                          //打开计数器
+  19   1              TI=1;          //发送中断标记位，如果使用printf函数的必须设置   
+  20   1      }
+  21          
+  22          void UART_SendData(u8 dat)
+  23          {
+  24   1              ES=0; //关闭串口中断
+  25   1              TI=0; //清发送完毕中断请求标志位
+  26   1              SBUF=dat; //发送
+  27   1              while(TI==0); //等待发送完毕
+  28   1              TI=0; //清发送完毕中断请求标志位
+  29   1              ES=1; //允许串口中断
+  30   1      }
+  31          
+  32          //ESP8266 WIFI发送AT指令
+  33          //pbuf：AT指令，字符串格式，如："AT"
+  34          void ESP8266_SendCmd(u8 *pbuf)
+  35          {
+  36   1              while(*pbuf!='\0') //遇到空格跳出循环   
+  37   1              {
+  38   2                      UART_SendData(*pbuf);
+  39   2                      delay_10us(5);
+  40   2                      pbuf++; 
+  41   2              }
+  42   1              delay_10us(5);
+  43   1              UART_SendData('\r');//回车
+  44   1              delay_10us(5);
+  45   1              UART_SendData('\n');//换行
+  46   1              delay_ms(1000);
+  47   1      }
+  48          
+  49          //ESP8266 WIFI发送数据到APP
+  50          //pbuf：数据
+  51          void ESP8266_SendData(u8 *pbuf)
+  52          {
+  53   1              ESP8266_SendCmd("AT+CIPSEND=0,7");
+  54   1              while(*pbuf!='\0') //遇到空格跳出循环   
+C51 COMPILER V9.01   UART                                                                  10/29/2024 14:02:36 PAGE 2   
+
+  55   1              {
+  56   2                      UART_SendData(*pbuf);
+  57   2                      delay_10us(5);
+  58   2                      pbuf++; 
+  59   2              }
+  60   1              UART_SendData('\n');//换行      
+  61   1      //      delay_ms(10);
+  62   1      }
+  63          
+  64          //ESP8266-WIFI模块工作模式初始化
+  65          void ESP8266_ModeInit(void)
+  66          {
+  67   1              ESP8266_SendCmd("AT+CWMODE=2");//设置路由器模式 1 staTIon模式 2 AP点 路由器模式 3 station+AP混合模式
+  68   1              ESP8266_SendCmd("AT+CWSAP=\"PRECHIN\",\"prechin168\",11,0"); //设置WIFI热点名及密码
+  69   1              ESP8266_SendCmd("AT+CIPAP=\"192.168.4.1\"");
+  70   1      //      ESP8266_SendCmd("AT+RST");//重新启动wifi模块
+  71   1      //      delay_ms(2000);
+  72   1              ESP8266_SendCmd("AT+CIPMUX=1"); //开启多连接模式，允许多个各客户端接入
+  73   1              ESP8266_SendCmd("AT+CIPSERVER=1,8080"); //启动TCP/IP 端口为8080 实现基于网络控制        
+  74   1      } 
+  75          
+  76          //WIFI控制初始化
+  77          void wifi_control_init(void)
+  78          {
+  79   1              UART_Init();
+  80   1              //ESP8266_ModeInit();
+  81   1              ES=1;//允许串口中断
+  82   1      }
+  83          
+  84          //串口中断服务函数
+  85          //接收手机APP发送的信号后控制板载资源
+  86          extern int setting_level;
+  87          #define VERIFY_NUM 3
+  88          void UART_IRQn() interrupt 4
+  89          {
+  90   1              static u8 i=0;
+  91   1      
+  92   1              if(RI)
+  93   1              {
+  94   2                      RI=0;
+  95   2                      UART_RX_BUF[i]=SBUF;//读取接收到的数据
+  96   2                      if(i==VERIFY_NUM)
+  97   2                      {
+  98   3                              i=0;
+  99   3                              //WIFI控制
+ 100   3                              if(UART_RX_BUF[VERIFY_NUM]==WATER_LEVEL_ON)
+ 101   3                                      setting_level=setting_level>WATER_DISTANCE_MIN?WATER_DISTANCE_MIN:setting_level+1;//设定水位加1                         
+ 102   3                              else if(UART_RX_BUF[VERIFY_NUM]==WATER_LEVEL_DOWN)
+ 103   3                                      setting_level=setting_level<WATER_DISTANCE_MAX?WATER_DISTANCE_MAX:setting_level-1;//设定水位减1
+ 104   3                      }
+ 105   2                      else if(UART_RX_BUF[0]=='@')i++;
+ 106   2                      else i=0;                       
+ 107   2              }       
+ 108   1      }
+ 109          
+ 110          //printf重定向
+ 111          char putchar(char ch)
+ 112          {
+ 113   1              UART_SendData(ch);
+ 114   1              return ch;
+ 115   1      }
+
+C51 COMPILER V9.01   UART                                                                  10/29/2024 14:02:36 PAGE 3   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    429    ----
+   CONSTANT SIZE    =    119    ----
+   XDATA SIZE       =     13       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
