@@ -1,9 +1,0 @@
-".\Objects\STARTUP.obj",
-".\Objects\motor.obj",
-".\Objects\lcd1602.obj",
-".\Objects\timer.obj",
-".\Objects\water_level_control.obj",
-".\Objects\main.obj",
-".\Objects\menu.obj" 
-TO ".\Objects\water_level_control" 
-PRINT(".\Objects\water_level_control.m51") RAMSIZE(256) 
